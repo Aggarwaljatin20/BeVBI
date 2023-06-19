@@ -1,13 +1,14 @@
 import os
 import glob
-from mat4py import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
 
 def interpolation(data):
+  inter_acc = np.zeros((2,640))  
   DL = int(data['DL'])
   DM = int(data['DM'])
   v = float(data['Vel']) # velocity of the vehicle, required for spatial interpolation
+  BL = int(data['BL'])
   if DM ==0: # if undamaged, it is labeled as DL=0 (DL =  Dead Location)
     DL=0
   DM = int(DM/20) #0 (DM=00%), 1 (DM=20%), and 2 (DM=40%)
@@ -15,8 +16,8 @@ def interpolation(data):
   a=data['Acc'] # Acceleration data of vehicle both body and axle
   acc = np.array(a)
   dt = 1/256 # time step for the data collection; Sampling frequency being 256 Hz
-  p1 = data['bridge_start']-1 # location when it start reaches the bridge.
-  p2 = data['bridge_end'] # location when it reaches end of the bridge
+  p1 = int(data['bridge_start'])-1 # location when it start reaches the bridge.
+  p2 = int(data['bridge_end']) # location when it reaches end of the bridge
   acc = acc[:,p1:p2] # chopping the signal based on the location on the bridge
   # frequency of sampling is 256Hz
   x = v*1/256*np.linspace(p1,p2-1,p2-p1)-100 # obtaining spatial position of the signals
