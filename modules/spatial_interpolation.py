@@ -4,8 +4,7 @@ from mat4py import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
 
-def interpolation(f):
-  data = loadmat(f) #loading the matfiles from the folder
+def interpolation(data):
   filename = data['Event']['file_name'] 
   BL = int(filename[1:3]) #getting the bridge length from the file name
   DM = int(filename[9:11])  # getting the damage magnitude (Dead Magnitude) from the file name
