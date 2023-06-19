@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from sklearn import preprocessing
 def bootstrap(data,dl,dm):
     N_1 = 250 # number used for training sample generation
     N_2 = 150 # number used for testing sample generation
@@ -19,13 +20,13 @@ def bootstrap(data,dl,dm):
         id = idx_train[0:X]
         d = data[id,:,:]
         d_avg = np.mean(d,axis=0)
-        d_avg = np.divide((d_avg - d_avg.mean()),d_avg.std())
+        d_avg = preprocessing.normalize(d_avg)
         data_train[i,:,:] = d_avg
     for i in range(n_test):
         random.shuffle(idx_test)
         id = idx_test[0:X]
         d = data[id,:,:]
         d_avg = np.mean(d,axis=0)
-        d_avg = np.divide((d_avg - d_avg.mean()),d_avg.std())
+        d_avg = preprocessing.normalize(d_avg)
         data_test[i,:,:] = d_avg
     return data_train,data_test,DL,DM
