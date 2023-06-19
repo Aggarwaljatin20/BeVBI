@@ -1,3 +1,14 @@
+from torch.autograd import Function
+import numpy as np
+from PIL import Image, ImageOps
+import random
+import torch
+import torch.nn as nn
+import torch.nn.functional as Fabs
+import torch.optim as optim
+from torchvision import datasets, transforms
+from sklearn.metrics import f1_score
+
 class ResizeImage():
     def __init__(self, size):
         if isinstance(size, int):
@@ -9,7 +20,6 @@ class ResizeImage():
         return img.resize((th, tw))
 
 class PlaceCrop(object):
-
     def __init__(self, size, start_x, start_y):
         if isinstance(size, int):
             self.size = (int(size), int(size))
@@ -17,7 +27,6 @@ class PlaceCrop(object):
             self.size = size
         self.start_x = start_x
         self.start_y = start_y
-
     def __call__(self, img):
         th, tw = self.size
         return img.crop((self.start_x, self.start_y, self.start_x + tw, self.start_y + th))
@@ -25,29 +34,24 @@ class PlaceCrop(object):
 class AddGaussianNoise(object):
     def __init__(self, mean=0., std=1.):
         self.std = std
-        self.mean = mean
-        
+        self.mean = mean        
     def __call__(self, tensor):
-        return tensor + torch.randn(tensor.size()) * self.std + self.mean
-    
+        return tensor + torch.randn(tensor.size()) * self.std + self.mean  
     def __repr__(self):
         return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, data, label_l, label_s, resize_size=64, crop_size=60,\
-                 is_train = True, fea_name='stft'):
+                 is_train = True):
         n = len(data)
         self.data = data
         self.label_l = label_l
         self.label_s = label_s
         self.resize_size = resize_size
         self.crop_size = crop_size
-        self.is_train = is_train
-        self.fea_name = fea_name
-        
+        self.is_train = is_train        
     def __len__(self):
-        return len(self.data)
-    
+        return len(self.data)   
     # Get one sample
     def __getitem__(self, index):  
         labels_l = int(self.label_l[index])
@@ -58,38 +62,29 @@ class Dataset(torch.utils.data.Dataset):
         else:
             img = img
         img = torch.tensor(img).float()
-
         return img, torch.tensor(labels_l).long(), torch.tensor(labels_s).long()
 
 class GetLoader(torch.utils.data.Dataset):
     def __init__(self, data_root, data_list, transform=None):
         self.root = data_root
         self.transform = transform
-
         f = open(data_list, 'r')
         data_list = f.readlines()
         f.close()
-
         self.n_data = len(data_list)
-
         self.img_paths = []
         self.img_labels = []
-
         for data in data_list:
             self.img_paths.append(data[:-3])
             self.img_labels.append(data[-2])
-
     def __getitem__(self, item):
         img_paths, labels = self.img_paths[item], self.img_labels[item]
         imgs = Image.open(os.path.join(self.root, img_paths))
         imgs = imgs.convert('RGB')
-
         if self.transform is not None:
             imgs = self.transform(imgs)
             labels = int(labels)
-
         return imgs, labels
-
     def __len__(self):
         return self.n_data
 
@@ -97,6 +92,7 @@ def optimizer_scheduler(optimizer, p):
     for param_group in optimizer.param_groups:
         param_group['lr'] = 0.01 / (1.0 + 10  * p) * 0.75
     return optimizer
+    
 class SupDann(nn.Module):
     def __init__(self):
         super(SupDann, self).__init__()
@@ -171,7 +167,7 @@ class SupDann(nn.Module):
         d_xq=d_xq.view(d_xq.shape[0],-1)
         d_xq_hier=d_xq_hier.view(d_xq_hier.shape[0],-1)
         return x, (d_xl,d_xq,d_xq_hier), s,(latent_xl,latent_xq,latent_xq_hier)
-from torch.autograd import Function
+        
 class GRL(Function):
     @staticmethod
     def forward(ctx, x, constant):
@@ -180,6 +176,7 @@ class GRL(Function):
     @staticmethod
     def backward(ctx, grad_output):
         return grad_output.neg() * ctx.constant, None
+
 def test_st(epoch,report_ep,model,source_train,source_test,\
                     target_train,target_test,criterion_l,\
                     criterion_s,criterion_d):
@@ -241,7 +238,6 @@ def test_st(epoch,report_ep,model,source_train,source_test,\
     pred_d = []  # detection as 0 or 1 for damage
     pred_l = []  # location detection for the damage
     pred_s = []  # quantification detection for the damage
-    
     with torch.no_grad():
         for data, target_d, target_s in target_test:
             data, target_d, target_s = data.to(device), target_d.to(device), target_s.to(device)
@@ -271,7 +267,6 @@ def test_st(epoch,report_ep,model,source_train,source_test,\
     accuracy_save.append(correct_l)
     accuracy_save.append(correct_s)
     if (epoch % report_ep==0):
-
         print('Target test set: Average loss: {:.4f}, {:.4f}'.format(
             test_loss1, test_loss2))
     return losses_save,accuracy_save,f1_save
