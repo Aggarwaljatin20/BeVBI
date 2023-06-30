@@ -11,7 +11,7 @@ Bridge health monitoring (BHM) is important to detect damages in the early stage
 To overcome these challenges, we introduce a Bootstrapping-enhanced Vehicle -Bridge-Invariant (BeVBI) approach for robust drive-by BHM. It reduces the vibration signal variation due to varying vehicle properties through bootstrapping-based mean estimations. Specifically, vibration signals obtained from  vehicles (with varying vehicle properties) passing the bridge are randomly aggregated with replacement (i.e., bootstrapping) and averaged. Based on the central limit theorem, averaging the aggregated signals (bootstrapped signals) reduces signal variability due to vehicle properties by the square root of the number of aggregated signals. Further, these bootstrapped signals are used to predict the damage on multiple bridges by adopting an unsupervised domain learning algorithm. The performance of the above approach is evaluated using a numerical vehicle bridge interaction dataset with two different bridges and 4800 drive-by vehicles having different dynamic properties and speeds. Our approach is successful in diagnosing multiple bridges while being robust to varying vehicle properties. It performs 1.45x better in the detection and localization of damage  and 1.75x better in the quantification of damage as compared to baseline methods (MCNN and HierMUD).
 
 ## Code Usage
-
+> https://github.com/Aggarwaljatin20/BeVBI.git
 ## Run the demo example with
 >jupyter notebook BeVBI_demo.ipynb
 
