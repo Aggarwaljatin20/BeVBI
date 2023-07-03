@@ -13,3 +13,5 @@ To overcome these challenges, we introduce a Bootstrapping-enhanced Vehicle -Bri
 ## Run the demo example with
 >jupyter notebook BeVBI_demo.ipynb
 
+## Contact Information:
+>jatin08@stanford.edu
